@@ -9,17 +9,13 @@ Widget::Widget(QWidget *parent)
     ui->comboBox->addItems(comboxData);
     data = QByteArray::fromHex("f2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f6");
     //qDebug() << "data.length:" << data.length();
-    serialPort.setPortName("/dev/ttyS0"); // 串口号，请根据实际情况修改
-    serialPort.setBaudRate(QSerialPort::Baud19200);
-    serialPort.setDataBits(QSerialPort::Data8);
-    serialPort.setParity(QSerialPort::EvenParity);
-    serialPort.setStopBits(QSerialPort::OneStop);
-    serialPort.setFlowControl(QSerialPort::NoFlowControl);
-    serialPort.open(QIODevice::ReadWrite);
-    connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
-    QTimer *timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, &Widget::sendData);
-    timer->start(200);
+    QStringList serialPortList = {"/dev/ttyS0", "/dev/ttyS1"};
+    ui->serial_port->addItems(serialPortList);
+
+//    connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
+//    QTimer *timer = new QTimer(this);
+//    connect(timer, &QTimer::timeout, this, &Widget::sendData);
+//    timer->start(200);
 }
 
 Widget::~Widget()
@@ -50,8 +46,25 @@ void Widget::on_recoveryData_clicked()
 void  Widget::handleReadyRead()
 {
     QByteArray receiveData = serialPort.readAll();
-    // 处理收到的数据，这里简单地打印出来
-    qDebug() << "Received data: " << data.toHex();
+    // 初始化起始位置以便在数据中搜索
+        int startIndex = 0;
+
+        while(startIndex <= data.size() - 21) { // 确保剩余数据足够检查一个21字节的报文
+            // 检查从startIndex开始的21字节数据是否符合条件
+            if(data.mid(startIndex, 1)[0] == '\xfc' && // 开头是fc
+               data.mid(startIndex, 21).endsWith('\xf6')) { // 结尾是f6且长度为21
+                // 符合条件的报文发现，进行回复
+                // 处理收到的数据，这里简单地打印出来
+                qDebug() << "Received data: " << data.toHex();
+                // 更新startIndex以检查下一个可能的子报文，注意这里是加21，因为已经检查过了当前的21字节
+                startIndex += 21;
+                sendData();
+            } else {
+                // 如果当前起始位置不符合条件，移动到下一个可能的起始位置
+                startIndex++;
+            }
+        }
+    sendData();
 }
 
 void Widget::sendData()
@@ -92,8 +105,6 @@ void Widget::on_door1_clicked()
     else {
         ;
     }
-    //data[5] = data[1] | 1;
-    //qDebug() << data.toHex() ;
 }
 
 void Widget::on_door2_clicked()
@@ -268,9 +279,33 @@ void Widget::on_door8_clicked()
 void Widget::on_car1_front_fault_clicked()
 {
     data[4] = data[4] | (1 << 0);
+    qDebug() << "报文修改为" << data << endl;
 }
 
 void Widget::on_car2_door2_fault_clicked()
 {
     data[4] = data[4] | (1 << 1);
+    qDebug() << "报文修改为" << data << endl;
+}
+
+void Widget::on_control_button_clicked()
+{
+    if(ui->control_button->text() == "开始")
+    {
+        serialPort.setPortName(ui->serial_port->currentText()); // 串口号，请根据实际情况修改
+        serialPort.setBaudRate(QSerialPort::Baud19200);
+        serialPort.setDataBits(QSerialPort::Data8);
+        serialPort.setParity(QSerialPort::EvenParity);
+        serialPort.setStopBits(QSerialPort::OneStop);
+        serialPort.setFlowControl(QSerialPort::NoFlowControl);
+        serialPort.open(QIODevice::ReadWrite);
+        connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
+        ui->control_button->setText("关闭");
+        qDebug() << ui->serial_port->currentText() << endl << data << endl;
+    }
+    else {
+        serialPort.close();
+        ui->control_button->setText("开始");
+        qDebug() << "关闭"  << endl;
+    }
 }

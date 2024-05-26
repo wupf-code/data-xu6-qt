@@ -18,7 +18,6 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     quint16 calculateCRC(const QByteArray &data);
-
     ~Widget();
 
 private slots:
@@ -47,6 +46,8 @@ private slots:
     void on_car1_front_fault_clicked();
 
     void on_car2_door2_fault_clicked();
+
+    void on_control_button_clicked();
 
 private:
     Ui::Widget *ui;
