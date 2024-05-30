@@ -305,6 +305,7 @@ void Widget::on_control_button_clicked()
     }
     else {
         serialPort.close();
+        disconnect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
         ui->control_button->setText("开始");
         qDebug() << "关闭"  << endl;
     }
