@@ -11,7 +11,6 @@ Widget::Widget(QWidget *parent)
     //qDebug() << "data.length:" << data.length();
     QStringList serialPortList = {"/dev/ttyS0", "/dev/ttyS1"};
     ui->serial_port->addItems(serialPortList);
-
 //    connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
 //    QTimer *timer = new QTimer(this);
 //    connect(timer, &QTimer::timeout, this, &Widget::sendData);
@@ -49,13 +48,13 @@ void  Widget::handleReadyRead()
     // 初始化起始位置以便在数据中搜索
         int startIndex = 0;
 
-        while(startIndex <= data.size() - 21) { // 确保剩余数据足够检查一个21字节的报文
+        while(startIndex <= receiveData.size() - 21) { // 确保剩余数据足够检查一个21字节的报文
             // 检查从startIndex开始的21字节数据是否符合条件
-            if(data.mid(startIndex, 1)[0] == '\xfc' && // 开头是fc
-               data.mid(startIndex, 21).endsWith('\xf6')) { // 结尾是f6且长度为21
+            if(receiveData.mid(startIndex, 1)[0] == '\xfc' && // 开头是fc
+               receiveData.mid(startIndex, 21).endsWith('\xf6')) { // 结尾是f6且长度为21
                 // 符合条件的报文发现，进行回复
                 // 处理收到的数据，这里简单地打印出来
-                qDebug() << "Received data: " << data.toHex();
+                qDebug() << "Received data: " << receiveData.toHex();
                 // 更新startIndex以检查下一个可能的子报文，注意这里是加21，因为已经检查过了当前的21字节
                 startIndex += 21;
                 sendData();
@@ -64,13 +63,12 @@ void  Widget::handleReadyRead()
                 startIndex++;
             }
         }
-    sendData();
+    //sendData();
 }
 
 void Widget::sendData()
 {
     count++;
-    qDebug() << count << endl;
     data[2] = quint8((count >> 8) & 0xFF);
     data[3] = quint8(count & 0xFF);
     quint16 checksum = calculateCRC(data);
@@ -81,6 +79,7 @@ void Widget::sendData()
     // 发送数据
     serialPort.write(data);
     qDebug() << "Sent data: " << data.toHex();
+    qDebug() << count << endl;
 }
 
 void Widget::on_door1_clicked()
@@ -304,7 +303,9 @@ void Widget::on_control_button_clicked()
         qDebug() << ui->serial_port->currentText() << endl << data << endl;
     }
     else {
+        disconnect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
         serialPort.close();
+
         ui->control_button->setText("开始");
         qDebug() << "关闭"  << endl;
     }
