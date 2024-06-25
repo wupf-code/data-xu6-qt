@@ -17,6 +17,7 @@ Widget::Widget(QWidget *parent)
 
 Widget::~Widget()
 {
+    delete ods;
     delete ui;
 }
 
@@ -27,22 +28,18 @@ void Widget::on_door1_clicked()
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 0);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 0);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 0);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 0);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -52,26 +49,21 @@ void Widget::on_door1_clicked()
 void Widget::on_door2_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 1);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 1);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 1);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 1);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -87,26 +79,21 @@ void Widget::on_recoveryData_clicked()
 void Widget::on_door3_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 2);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 2);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 2);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 2);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -116,26 +103,21 @@ void Widget::on_door3_clicked()
 void Widget::on_door4_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 3);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 3);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 3);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 3);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -145,26 +127,21 @@ void Widget::on_door4_clicked()
 void Widget::on_door5_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 4);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 4);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 4);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 4);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -174,26 +151,21 @@ void Widget::on_door5_clicked()
 void Widget::on_door6_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 5);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 5);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 5);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 5);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -203,26 +175,21 @@ void Widget::on_door6_clicked()
 void Widget::on_door7_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 6);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 6);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 6);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 6);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -232,26 +199,21 @@ void Widget::on_door7_clicked()
 void Widget::on_door8_clicked()
 {
     ods->setDataByte(4, 2);
-    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
         ods->setDataByte(5, 7);
-//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
         ods->setDataByte(6, 7);
-//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
         ods->setDataByte(7, 7);
-//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
         ods->setDataByte(8, 7);
-//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -261,14 +223,12 @@ void Widget::on_door8_clicked()
 void Widget::on_car1_front_fault_clicked()
 {
     ods->setDataByte(4, 0);
-    //data[4] = data[4] | (1 << 0);
     qDebug() << "报文修改为" << ods->getData() << endl;
 }
 
 void Widget::on_car2_door2_fault_clicked()
 {
     ods->setDataByte(4, 1);
-    //data[4] = data[4] | (1 << 1);
     qDebug() << "报文修改为" << ods->getData() << endl;
 }
 
