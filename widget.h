@@ -6,7 +6,7 @@
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include <QtDebug>
-#include <QTimer>
+#include "ods.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class Widget; }
 QT_END_NAMESPACE
@@ -17,13 +17,9 @@ class Widget : public QWidget
 
 public:
     Widget(QWidget *parent = nullptr);
-    quint16 calculateCRC(const QByteArray &data);
     ~Widget();
 
 private slots:
-    void handleReadyRead();
-
-    void sendData();
 
     void on_door1_clicked();
 
@@ -51,9 +47,6 @@ private slots:
 
 private:
     Ui::Widget *ui;
-    QByteArray data;
-    QSerialPort serialPort;
-    quint16 count = 0;
-    const QByteArray emptyData = QByteArray::fromHex("f2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f6");
+    Ods *ods;
 };
 #endif // WIDGET_H

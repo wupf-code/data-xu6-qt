@@ -7,99 +7,42 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     QStringList comboxData = {"car1", "car2", "car3", "car4", "car5", "car6"};
     ui->comboBox->addItems(comboxData);
-    data = QByteArray::fromHex("f2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f6");
-    //qDebug() << "data.length:" << data.length();
     QStringList serialPortList = {"/dev/ttyS0", "/dev/ttyS1"};
     ui->serial_port->addItems(serialPortList);
-//    connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
-//    QTimer *timer = new QTimer(this);
-//    connect(timer, &QTimer::timeout, this, &Widget::sendData);
-//    timer->start(200);
+
+    ods = new Ods(this);
+    QByteArray data = QByteArray::fromHex("f2 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f6");
+    ods->setData(data);
 }
 
 Widget::~Widget()
 {
-    serialPort.close();
     delete ui;
-}
-
-quint16 Widget::calculateCRC(const QByteArray &data)
-{
-    quint16 checksum = 0xFFFF;
-    for (int i = 1; i < data.size() - 3; ++i)
-    {
-        checksum ^= quint8(data.at(i)) << 8;
-        for (int j = 0; j < 8; ++j)
-        {
-            checksum = (checksum & 0x8000) ? ((checksum << 1) ^ 0x1021) : (checksum << 1);
-        }
-    }
-    return checksum;
-}
-
-void Widget::on_recoveryData_clicked()
-{
-    data = emptyData;
-}
-
-void  Widget::handleReadyRead()
-{
-    QByteArray receiveData = serialPort.readAll();
-    // 初始化起始位置以便在数据中搜索
-        int startIndex = 0;
-
-        while(startIndex <= receiveData.size() - 21) { // 确保剩余数据足够检查一个21字节的报文
-            // 检查从startIndex开始的21字节数据是否符合条件
-            if(receiveData.mid(startIndex, 1)[0] == '\xfc' && // 开头是fc
-               receiveData.mid(startIndex, 21).endsWith('\xf6')) { // 结尾是f6且长度为21
-                // 符合条件的报文发现，进行回复
-                // 处理收到的数据，这里简单地打印出来
-                qDebug() << "Received data: " << receiveData.toHex();
-                // 更新startIndex以检查下一个可能的子报文，注意这里是加21，因为已经检查过了当前的21字节
-                startIndex += 21;
-                sendData();
-            } else {
-                // 如果当前起始位置不符合条件，移动到下一个可能的起始位置
-                startIndex++;
-            }
-        }
-    //sendData();
-}
-
-void Widget::sendData()
-{
-    count++;
-    data[2] = quint8((count >> 8) & 0xFF);
-    data[3] = quint8(count & 0xFF);
-    quint16 checksum = calculateCRC(data);
-
-    // 更新校验位
-    data[data.size() - 3] = quint8((checksum >> 8) & 0xFF);
-    data[data.size() - 2] = quint8(checksum & 0xFF);
-    // 发送数据
-    serialPort.write(data);
-    qDebug() << "Sent data: " << data.toHex();
-    qDebug() << count << endl;
 }
 
 void Widget::on_door1_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | 1;
+        ods->setDataByte(5, 0);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | 1;
+        ods->setDataByte(6, 0);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | 1;
+        ods->setDataByte(7, 0);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | 1;
+        ods->setDataByte(8, 0);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -108,47 +51,62 @@ void Widget::on_door1_clicked()
 
 void Widget::on_door2_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 1);
+        ods->setDataByte(5, 1);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 1);
+        ods->setDataByte(6, 1);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 1);
+        ods->setDataByte(7, 1);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 1);
+        ods->setDataByte(8, 1);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
     }
 }
 
+void Widget::on_recoveryData_clicked()
+{
+    ods->onRecoverydataClicked();
+}
+
 
 void Widget::on_door3_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 2);
+        ods->setDataByte(5, 2);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 2);
+        ods->setDataByte(6, 2);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 2);
+        ods->setDataByte(7, 2);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 2);
+        ods->setDataByte(8, 2);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -157,22 +115,27 @@ void Widget::on_door3_clicked()
 
 void Widget::on_door4_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 3);
+        ods->setDataByte(5, 3);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 3);
+        ods->setDataByte(6, 3);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 3);
+        ods->setDataByte(7, 3);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 3);
+        ods->setDataByte(8, 3);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -181,22 +144,27 @@ void Widget::on_door4_clicked()
 
 void Widget::on_door5_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 4);
+        ods->setDataByte(5, 4);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 4);
+        ods->setDataByte(6, 4);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 4);
+        ods->setDataByte(7, 4);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 4);
+        ods->setDataByte(8, 4);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -205,22 +173,27 @@ void Widget::on_door5_clicked()
 
 void Widget::on_door6_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 5);
+        ods->setDataByte(5, 5);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 5);
+        ods->setDataByte(6, 5);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 5);
+        ods->setDataByte(7, 5);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 5);
+        ods->setDataByte(8, 5);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -229,22 +202,27 @@ void Widget::on_door6_clicked()
 
 void Widget::on_door7_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 6);
+        ods->setDataByte(5, 6);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 6);
+        ods->setDataByte(6, 6);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 6);
+        ods->setDataByte(7, 6);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 6);
+        ods->setDataByte(8, 6);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -253,22 +231,27 @@ void Widget::on_door7_clicked()
 
 void Widget::on_door8_clicked()
 {
-    data[4] = data[4] | (1 << 2);
+    ods->setDataByte(4, 2);
+    //data[4] = data[4] | (1 << 2);
     if(ui->comboBox->currentIndex() == 0)
     {
-        data[5] = data[5] | (1 << 7);
+        ods->setDataByte(5, 7);
+//        data[5] = data[5] | 1;
     }
     else if (ui->comboBox->currentIndex() == 1)
     {
-        data[6] = data[6] | (1 << 7);
+        ods->setDataByte(6, 7);
+//        data[6] = data[6] | 1;
     }
     else if (ui->comboBox->currentIndex() == 2)
     {
-        data[7] = data[7] | (1 << 7);
+        ods->setDataByte(7, 7);
+//        data[7] = data[7] | 1;
     }
     else if (ui->comboBox->currentIndex() == 3)
     {
-        data[8] = data[8] | (1 << 7);
+        ods->setDataByte(8, 7);
+//        data[8] = data[8] | 1;
     }
     else {
         ;
@@ -277,35 +260,37 @@ void Widget::on_door8_clicked()
 
 void Widget::on_car1_front_fault_clicked()
 {
-    data[4] = data[4] | (1 << 0);
-    qDebug() << "报文修改为" << data << endl;
+    ods->setDataByte(4, 0);
+    //data[4] = data[4] | (1 << 0);
+    qDebug() << "报文修改为" << ods->getData() << endl;
 }
 
 void Widget::on_car2_door2_fault_clicked()
 {
-    data[4] = data[4] | (1 << 1);
-    qDebug() << "报文修改为" << data << endl;
+    ods->setDataByte(4, 1);
+    //data[4] = data[4] | (1 << 1);
+    qDebug() << "报文修改为" << ods->getData() << endl;
 }
 
 void Widget::on_control_button_clicked()
 {
     if(ui->control_button->text() == "开始")
     {
-        serialPort.setPortName(ui->serial_port->currentText()); // 串口号，请根据实际情况修改
-        serialPort.setBaudRate(QSerialPort::Baud19200);
-        serialPort.setDataBits(QSerialPort::Data8);
-        serialPort.setParity(QSerialPort::EvenParity);
-        serialPort.setStopBits(QSerialPort::OneStop);
-        serialPort.setFlowControl(QSerialPort::NoFlowControl);
-        serialPort.open(QIODevice::ReadWrite);
-        connect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
+        ods->serialPort.setPortName(ui->serial_port->currentText()); // 串口号，请根据实际情况修改
+        ods->serialPort.setBaudRate(QSerialPort::Baud19200);
+        ods->serialPort.setDataBits(QSerialPort::Data8);
+        ods->serialPort.setParity(QSerialPort::EvenParity);
+        ods->serialPort.setStopBits(QSerialPort::OneStop);
+        ods->serialPort.setFlowControl(QSerialPort::NoFlowControl);
+        ods->serialPort.open(QIODevice::ReadWrite);
+        connect(&(ods->serialPort), &QSerialPort::readyRead, ods, &Ods::handleReadyRead);
         ui->control_button->setText("关闭");
-        qDebug() << ui->serial_port->currentText() << endl << data << endl;
+        qDebug() << ui->serial_port->currentText() << endl << ods->getData() << endl;
     }
     else {
-        disconnect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
-        serialPort.close();
-        disconnect(&serialPort, &QSerialPort::readyRead, this, &Widget::handleReadyRead);
+        disconnect(&(ods->serialPort), &QSerialPort::readyRead, ods, &Ods::handleReadyRead);
+        ods->serialPort.close();
+        //disconnect(&serialPort, &QSerialPort::readyRead, ods, &Widget::handleReadyRead);
         ui->control_button->setText("开始");
         qDebug() << "关闭"  << endl;
     }
